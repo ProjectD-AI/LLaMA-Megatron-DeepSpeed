@@ -82,7 +82,7 @@ class Encoder(object):
             text = data[key]
             doc_ids = []
             for sentence in Encoder.splitter.tokenize(text):
-                print(text)
+                print(sentence)
                 sentence_ids = Encoder.tokenizer.tokenize(sentence)
                 print(sentence_ids)
                 if len(sentence_ids) > 0:
