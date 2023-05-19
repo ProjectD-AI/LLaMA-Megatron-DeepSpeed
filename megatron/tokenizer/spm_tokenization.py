@@ -209,7 +209,7 @@ class SpmTokenizer(object):
                  special_tokens=None, max_len=None):
 
         self.sp_model = spm.SentencePieceProcessor()
-
+        self.sp_model.Load(vocab_file)
         self.vocab = {self.sp_model.IdToPiece(i): i for i
                       in range(self.sp_model.GetPieceSize())}
 
