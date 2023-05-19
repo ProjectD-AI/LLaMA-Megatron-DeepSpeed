@@ -42,7 +42,6 @@ def build_tokenizer(args):
         assert args.merge_file is not None
         tokenizer = _GPT2BPETokenizer(args.vocab_file, args.merge_file)
     elif args.tokenizer_type == 'SpmTokenizer':
-        assert args.merge_file is not None
         tokenizer = _SpmTokenizer(args.vocab_file)
     else:
         raise NotImplementedError('{} tokenizer is not '
