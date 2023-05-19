@@ -20,7 +20,7 @@ from abc import abstractmethod
 
 from .bert_tokenization import FullTokenizer as FullBertTokenizer
 from .gpt2_tokenization import GPT2Tokenizer
-
+from .spm_tokenization import SpmTokenizer
 
 def build_tokenizer(args):
     """Initialize tokenizer."""
@@ -41,6 +41,9 @@ def build_tokenizer(args):
     elif args.tokenizer_type == 'GPT2BPETokenizer':
         assert args.merge_file is not None
         tokenizer = _GPT2BPETokenizer(args.vocab_file, args.merge_file)
+    elif args.tokenizer_type == 'SpmTokenizer':
+        assert args.merge_file is not None
+        tokenizer = _SpmTokenizer(args.vocab_file)
     else:
         raise NotImplementedError('{} tokenizer is not '
                                   'implemented.'.format(args.tokenizer_type))
@@ -289,3 +292,32 @@ class _GPT2BPETokenizer(AbstractTokenizer):
     @property
     def eod(self):
         return self.eod_id
+
+class _SpmTokenizer(AbstractTokenizer):
+    def __init__(self, vocab_file):
+        name = 'SPM'
+        super().__init__(name)
+
+        self.tokenizer = SpmTokenizer(vocab_file, max_len=2048)
+        self.unk_id = 0
+        self.bos_id = 1
+        self.eod_id = 2
+        self.pad_id = 3
+
+    @property
+    def vocab_size(self):
+        return len(self.tokenizer.vocab)
+
+    @property
+    def vocab(self):
+        return self.tokenizer.vocab
+
+    @property
+    def inv_vocab(self):
+        return self.tokenizer.decoder
+
+    def tokenize(self, text):
+        return self.tokenizer.encode(text)
+
+    def detokenize(self, token_ids):
+        return self.tokenizer.decode(token_ids)
