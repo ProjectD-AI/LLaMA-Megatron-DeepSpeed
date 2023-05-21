@@ -18,7 +18,7 @@ import os
 import random
 import numpy
 import torch
-
+sys.path.append("..")
 import megatron.mpu as mpu
 from deepspeed.accelerator import get_accelerator
 
