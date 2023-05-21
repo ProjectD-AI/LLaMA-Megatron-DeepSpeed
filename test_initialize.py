@@ -2,10 +2,57 @@
 import sys
 sys.path.append("..")
 
-from commons import print_separator
-from commons import initialize_distributed
 import megatron.mpu as mpu
 import torch
+import argparse
+import os
+import random
+import numpy
+from deepspeed.accelerator import get_accelerator
+
+
+def initialize_distributed(backend='nccl'):
+    """Initialize torch.distributed."""
+    # Get local rank in case it is provided.
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--local_rank', type=int, default=None,
+                        help='local rank passed from distributed launcher')
+    args = parser.parse_args()
+    local_rank = args.local_rank
+
+    # Get rank and world size.
+    rank = int(os.getenv('RANK', '0'))
+    world_size = int(os.getenv("WORLD_SIZE", '1'))
+
+    print('> initializing torch.distributed with local rank: {}, '
+          'rank: {}, world size: {}'.format(local_rank, rank, world_size))
+
+    # Set the device id.
+    device = rank % get_accelerator().device_count()
+    if local_rank is not None:
+        device = local_rank
+    get_accelerator().set_device(device)
+
+    # Call the init process.
+    init_method = 'tcp://'
+    master_ip = os.getenv('MASTER_ADDR', 'localhost')
+    master_port = os.getenv('MASTER_PORT', '6000')
+    init_method += master_ip + ':' + master_port
+    torch.distributed.init_process_group(
+        backend=backend,
+        world_size=world_size,
+        rank=rank,
+        init_method=init_method)
+
+
+def print_separator(message):
+    torch.distributed.barrier()
+    filler_len = (78 - len(message)) // 2
+    filler = '-' * filler_len
+    string = '\n' + filler + ' {} '.format(message) + filler
+    if torch.distributed.get_rank() == 0:
+        print(string, flush=True)
+    torch.distributed.barrier()
 
 def run_test(
         tensor_model_parallel_size: int,
