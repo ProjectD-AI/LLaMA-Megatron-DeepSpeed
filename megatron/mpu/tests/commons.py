@@ -21,7 +21,7 @@ import os
 import random
 import numpy
 import torch
-import megatron.mpu as mpu
+import mpu
 from deepspeed.accelerator import get_accelerator
 
 class IdentityLayer(torch.nn.Module):
