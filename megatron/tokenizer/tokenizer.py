@@ -319,3 +319,7 @@ class _SpmTokenizer(AbstractTokenizer):
 
     def detokenize(self, token_ids):
         return self.tokenizer.decode(token_ids)
+
+    @property
+    def eod(self):
+        return self.eod_id
