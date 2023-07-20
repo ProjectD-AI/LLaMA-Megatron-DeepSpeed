@@ -876,7 +876,8 @@ class LlamaModelPipe(PipelineModule, MegatronModule):
                          loss_fn=CrossEntropy,
                          topology=topo,
                          activation_checkpoint_interval=interval,
-                         partition_method='type:transformer')
+                         partition_method='type:transformer',
+                         checkpointable_layers=['LlamaParallelTransformerLayerPipe'])
 
 
 class LlamaModel(MegatronModule):
